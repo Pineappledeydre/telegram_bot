@@ -1,7 +1,10 @@
 import telebot
 
-# Токен от BotFather
-API_TOKEN = "7035407255:AAH8uX3eMjYhSipe09cYHDcMV5Wp-mbeBuA"
+# Токен от BotFather из переменной окружения
+API_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+
+if not API_TOKEN:
+    raise ValueError("Токен Telegram API не найден! Убедитесь, что переменная окружения TELEGRAM_BOT_TOKEN установлена.")
 
 # Создание объекта бота
 bot = telebot.TeleBot(API_TOKEN)
