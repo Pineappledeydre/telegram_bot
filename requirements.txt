@@ -315,3 +315,5 @@ wrapt==1.14.1
 wsproto==1.2.0
 yarl==1.11.1
 zipp==3.20.1
+setuptools>=58.0.4
+wheel
