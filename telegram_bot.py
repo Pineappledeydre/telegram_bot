@@ -1,3 +1,4 @@
+import os
 import telebot
 from flask import Flask, request
 import logging
@@ -8,8 +9,8 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # Telegram API Token and Webhook URL
-API_TOKEN = "7451259345:AAGAXrbm7xanA5ef6HfLqdl51qnI6xopNLA"  # Your bot token
-WEBHOOK_URL = "https://telegram-bot-pineappledeydre.onrender.com"  # Your webhook URL
+API_TOKEN = "7451259345:AAGAXrbm7xanA5ef6HfLqdl51qnI6xopNLA"  #  bot token
+WEBHOOK_URL = "https://telegram-bot-pineappledeydre.onrender.com"  #  webhook URL
 
 # Create bot and Flask app
 bot = telebot.TeleBot(API_TOKEN)
@@ -19,16 +20,24 @@ app = Flask(__name__)
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     logger.info(f"Received /start command from user {message.chat.id}")
-    bot.reply_to(message, "Привет, я бот! Я умею искать информацию в интернете за тебя.")
+    try:
+        bot.reply_to(message, "Привет, я бот! Я умею искать информацию в интернете за тебя.")
+        logger.info(f"Sent /start reply to user {message.chat.id}")
+    except Exception as e:
+        logger.error(f"Error in /start handler: {e}")
 
 # Handler for /help command
 @bot.message_handler(commands=['help'])
 def send_help(message):
     logger.info(f"Received /help command from user {message.chat.id}")
-    bot.reply_to(
-        message,
-        "Напишите запрос, и я найду ссылку в Google. Напишите 'шутка', чтобы услышать смешное!"
-    )
+    try:
+        bot.reply_to(
+            message,
+            "Напишите запрос, и я найду ссылку в Google. Напишите 'шутка', чтобы услышать смешное!"
+        )
+        logger.info(f"Sent /help reply to user {message.chat.id}")
+    except Exception as e:
+        logger.error(f"Error in /help handler: {e}")
 
 # Handler for "шутка"
 @bot.message_handler(func=lambda message: message.text.lower() == "шутка")
@@ -40,7 +49,10 @@ def send_joke(message):
     ]
     joke = random.choice(jokes)
     logger.info(f"Sending joke to user {message.chat.id}: {joke}")
-    bot.reply_to(message, joke)
+    try:
+        bot.reply_to(message, joke)
+    except Exception as e:
+        logger.error(f"Error sending joke: {e}")
 
 # Handler for general text messages
 @bot.message_handler(func=lambda message: True)
@@ -48,15 +60,22 @@ def handle_query(message):
     user_query = message.text
     google_search_link = f"https://google.com/?q={'+'.join(user_query.split())}"
     logger.info(f"Received query from user {message.chat.id}: {user_query}")
-    bot.reply_to(message, f"Вот что я нашел: {google_search_link}")
+    try:
+        bot.reply_to(message, f"Вот что я нашел: {google_search_link}")
+    except Exception as e:
+        logger.error(f"Error handling query: {e}")
 
 # Webhook route to receive updates from Telegram
 @app.route(f'/{API_TOKEN}', methods=['POST'])
 def webhook():
     logger.info("Received POST request to webhook.")
-    json_string = request.get_data().decode('utf-8')
-    update = telebot.types.Update.de_json(json_string)
-    bot.process_new_updates([update])
+    try:
+        json_string = request.get_data().decode('utf-8')
+        update = telebot.types.Update.de_json(json_string)
+        bot.process_new_updates([update])
+        logger.info("Processed new update.")
+    except Exception as e:
+        logger.error(f"Error processing webhook request: {e}")
     return '!', 200
 
 # Route to confirm the bot is running
@@ -66,6 +85,12 @@ def index():
     return 'Bot is running!', 200
 
 if __name__ == "__main__":
-    bot.remove_webhook()
-    bot.set_webhook(url=f"{WEBHOOK_URL}/{API_TOKEN}")
+    try:
+        bot.remove_webhook()
+        bot.set_webhook(url=f"{WEBHOOK_URL}/{API_TOKEN}")
+        logger.info(f"Webhook set to: {WEBHOOK_URL}/{API_TOKEN}")
+    except Exception as e:
+        logger.error(f"Error setting webhook: {e}")
+
+    # Run the Flask app
     app.run(host='0.0.0.0', port=5000, debug=True)
