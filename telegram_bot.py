@@ -1,4 +1,5 @@
 import telebot
+import os
 
 # Токен от BotFather из переменной окружения
 API_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
