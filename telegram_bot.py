@@ -24,8 +24,12 @@ app = Flask(__name__)
 # Handler for /start command
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    logger.info(f"Received /start command from user {message.chat.id}")
-    bot.reply_to(message, "Привет, я бот! Я умею искать информацию в интернете за тебя.")
+    logger.info(f"Processing /start command from user {message.chat.id}")
+    try:
+        bot.reply_to(message, "Привет, я бот! Я умею искать информацию в интернете за тебя.")
+        logger.info(f"Reply sent to user {message.chat.id}")
+    except Exception as e:
+        logger.error(f"Failed to send reply: {e}")
 
 # Handler for /help command
 @bot.message_handler(commands=['help'])
